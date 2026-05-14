@@ -1,0 +1,481 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────────
+
+enum Role {
+  GLOBAL_ADMIN
+  DEALER_BOSS
+  DEALER_MANAGER
+  LC_BOSS
+  LC_AGENT
+  CLIENT
+  GUEST
+}
+
+enum CompanyType {
+  DEALER
+  LEASING_COMPANY
+  CLIENT
+}
+
+enum CompanyStatus {
+  ACTIVE
+  BLOCKED
+  BLACKLISTED
+  PENDING_VERIFICATION
+}
+
+enum ApplicationStatus {
+  DRAFT
+  TENDER_ACTIVE
+  TENDER_CLOSED
+  CLIENT_ACCEPTED
+  DOCUMENTS_PENDING
+  PAYMENT_PENDING
+  DELIVERY_PENDING
+  DELIVERED
+  CANCELLED
+  DISPUTED
+}
+
+enum OfferStatus {
+  ACTIVE
+  WITHDRAWN
+  SELECTED
+  REJECTED
+}
+
+enum DocumentType {
+  PURCHASE_AGREEMENT    // ДКП
+  LEASING_CONTRACT      // Договор лизинга
+  INVOICE               // Счет
+  DELIVERY_ACT          // Акт приема-передачи
+}
+
+enum DocumentStatus {
+  GENERATING
+  READY
+  SIGNED
+  REJECTED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  BLOCK
+  UNBLOCK
+  ACCEPT_OFFER
+  DELIVER
+  DISPUTE_OPEN
+  DISPUTE_RESOLVE
+  EXTERNAL_CHECK // Added for explicit scoring checks
+}
+
+enum ManagerGrade {
+  BRONZE
+  SILVER
+  GOLD
+}
+
+enum Currency {
+  KZT
+  USD
+  CNY
+  EUR
+}
+
+enum DisputeStatus {
+  OPEN
+  MEDIATION
+  RESOLVED
+  ESCALATED
+}
+
+// ─── МОДЕЛИ ───────────────────────────────────────────
+
+model Company {
+  id              String        @id @default(cuid())
+  bin             String        @unique
+  name            String
+  type            CompanyType
+  status          CompanyStatus @default(PENDING_VERIFICATION)
+  iban            String?
+  phone           String?
+  email           String?
+  address         String?
+  logoUrl         String?
+  isVatIncluded   Boolean       @default(true)
+  walletBalance   Decimal       @default(0) @db.Decimal(15,2)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  users           User[]
+  listings        Listing[]
+  clientApps      Application[] @relation("ClientCompany")
+  dealerApps      Application[] @relation("DealerCompany")
+  lcOffers        Offer[]
+  documents       Document[]
+  walletTxns      WalletTransaction[]
+  subsidyPrograms SubsidyEligibility[]
+
+  @@index([type, status])
+}
+
+model User {
+  id              String    @id @default(cuid())
+  clerkId         String    @unique
+  companyId       String
+  role            Role
+  firstName       String
+  lastName        String
+  email           String    @unique
+  whatsappNumber  String?
+  grade           ManagerGrade @default(BRONZE)
+  bonusBalance    Decimal   @default(0) @db.Decimal(15,2)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  company         Company   @relation(fields: [companyId], references: [id])
+  assignedApps    Application[] @relation("AssignedManager")
+  submittedOffers Offer[]
+  auditLogs       AuditLog[]
+  bonusHistory    BonusTransaction[]
+  sentMessages    ChatMessage[]
+
+  @@index([companyId, role])
+  @@index([clerkId])
+}
+
+model Listing {
+  id              String    @id @default(cuid())
+  dealerCompanyId String
+  slug            String    @unique
+  smartId         String    @unique
+
+  // Основные данные
+  name            String
+  category        String    // Экскаваторы, Краны, Тракторы...
+  brand           String
+  model           String
+  year            Int
+  condition       String    // NEW | USED
+  region          String
+
+  // Финансовые данные
+  price           Decimal   @db.Decimal(15,2)
+  currency        Currency  @default(KZT)
+  priceUsd        Decimal?  @db.Decimal(15,2)
+
+  // Медиа
+  photos          String[]  // S3 URLs
+  videoUrl        String?   // S3 HLS URL
+
+  // Технические характеристики (JSONB)
+  specs           Json      @default("{}")
+
+  // Статус
+  isActive        Boolean   @default(true)
+  isFeatured      Boolean   @default(false)
+  viewCount       Int       @default(0)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  dealerCompany   Company   @relation(fields: [dealerCompanyId], references: [id])
+  applications    Application[]
+
+  @@index([category, isActive])
+  @@index([dealerCompanyId, isActive])
+  @@index([price, currency])
+}
+
+model Application {
+  id                  String            @id @default(cuid())
+  smartId             String            @unique
+  status              ApplicationStatus @default(DRAFT)
+
+  // Участники
+  clientCompanyId     String
+  dealerCompanyId     String
+  assignedManagerId   String?
+  selectedOfferId     String?
+
+  // Техника (snapshot на момент создания)
+  listingId           String
+  listingSnapshot     Json              // Полный слепок данных техники
+
+  // Финансовые параметры заявки
+  requestedAmount     Decimal           @db.Decimal(15,2)
+  advancePercent      Decimal           @db.Decimal(5,2)
+  requestedTermMonths Int
+  currency            Currency          @default(KZT)
+
+  // Данные клиента (маскируются до акцепта)
+  clientBin           String
+  clientName          String
+  clientPhone         String
+  clientEmail         String
+  clientRegion        String
+  clientIndustry      String
+
+  // Блокировка цены после акцепта
+  lockedPrice         Decimal?          @db.Decimal(15,2)
+  lockedAt            DateTime?
+
+  // Тендер
+  tenderStartedAt     DateTime?
+  tenderEndsAt        DateTime?
+  antiSnipingCount    Int               @default(0)
+
+  // Резервация (72ч)
+  reservationDeadline DateTime?
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  clientCompany       Company           @relation("ClientCompany", fields: [clientCompanyId], references: [id])
+  dealerCompany       Company           @relation("DealerCompany", fields: [dealerCompanyId], references: [id])
+  assignedManager     User?             @relation("AssignedManager", fields: [assignedManagerId], references: [id])
+  listing             Listing           @relation(fields: [listingId], references: [id])
+  offers              Offer[]
+  selectedOffer       Offer?            @relation("SelectedOffer", fields: [selectedOfferId], references: [id])
+  documents           Document[]
+  deliveryPhotos      DeliveryPhoto[]
+  disputes            Dispute[]
+  chatMessages        ChatMessage[]
+  notifications       Notification[]
+
+  @@index([status, clientCompanyId])
+  @@index([status, dealerCompanyId])
+  @@index([smartId])
+  @@index([clientBin, createdAt])
+  @@index([tenderEndsAt])
+}
+
+model Offer {
+  id                  String      @id @default(cuid())
+  applicationId       String
+  lcCompanyId         String
+  submittedByUserId   String
+  status              OfferStatus @default(ACTIVE)
+
+  // Условия лизинга
+  annualRate          Decimal     @db.Decimal(5,2)   // % годовых
+  advancePercent      Decimal     @db.Decimal(5,2)   // % аванса
+  termMonths          Int
+  monthlyPayment      Decimal     @db.Decimal(15,2)
+  totalOverpayment    Decimal     @db.Decimal(15,2)
+  gaes                Decimal     @db.Decimal(5,2)   // ГЭСВ
+
+  // Дополнительные условия
+  hasInsurance        Boolean     @default(false)
+  hasGPS              Boolean     @default(false)
+  comment             String?
+
+  // Курс валюты на момент подачи (snapshot)
+  currencySnapshot    Json
+
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  application         Application @relation(fields: [applicationId], references: [id])
+  lcCompany           Company     @relation(fields: [lcCompanyId], references: [id])
+  submittedBy         User        @relation(fields: [submittedByUserId], references: [id])
+  selectedForApps     Application[] @relation("SelectedOffer")
+
+  @@unique([applicationId, lcCompanyId])
+  @@index([applicationId, status])
+}
+
+model Document {
+  id              String          @id @default(cuid())
+  applicationId   String
+  companyId       String
+  type            DocumentType
+  status          DocumentStatus  @default(GENERATING)
+
+  // Данные документа (snapshot)
+  dataSnapshot    Json
+
+  // Файл
+  s3Key           String?
+  s3Url           String?
+  qrCode          String?
+  watermarkData   Json?
+
+  // Подпись
+  signedAt        DateTime?
+  signedByUserId  String?
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  application     Application     @relation(fields: [applicationId], references: [id])
+  company         Company         @relation(fields: [companyId], references: [id])
+
+  @@index([applicationId, type])
+}
+
+model DeliveryPhoto {
+  id              String    @id @default(cuid())
+  applicationId   String
+  s3Key           String
+  s3Url           String
+  latitude        Float?
+  longitude       Float?
+  takenAt         DateTime
+  watermarkData   Json
+
+  createdAt       DateTime  @default(now())
+
+  application     Application @relation(fields: [applicationId], references: [id])
+}
+
+model AuditLog {
+  id              String      @id @default(cuid())
+  userId          String?
+  action          AuditAction
+  entityType      String
+  entityId        String
+  oldValue        Json?
+  newValue        Json?
+  ipAddress       String?
+  userAgent       String?
+  durationMs      Int?
+
+  createdAt       DateTime    @default(now())
+
+  user            User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
+}
+
+model WalletTransaction {
+  id              String    @id @default(cuid())
+  companyId       String
+  amount          Decimal   @db.Decimal(15,2)
+  type            String    // CREDIT | DEBIT
+  description     String
+  balanceAfter    Decimal   @db.Decimal(15,2)
+  referenceId     String?   // applicationId или другой
+
+  createdAt       DateTime  @default(now())
+
+  company         Company   @relation(fields: [companyId], references: [id])
+
+  @@index([companyId, createdAt])
+}
+
+model BonusTransaction {
+  id              String    @id @default(cuid())
+  userId          String
+  amount          Decimal   @db.Decimal(15,2)
+  type            String    // EARNED | SPENT
+  reason          String
+  applicationId   String?
+  balanceAfter    Decimal   @db.Decimal(15,2)
+
+  createdAt       DateTime  @default(now())
+
+  user            User      @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model SubsidyProgram {
+  id              String    @id @default(cuid())
+  name            String
+  provider        String    // "Даму" | "КазАгроФинанс"
+  categories      String[]
+  regions         String[]
+  maxAmount       Decimal?  @db.Decimal(15,2)
+  subsidyPercent  Decimal   @db.Decimal(5,2)
+  requirements    Json
+  isActive        Boolean   @default(true)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  eligibilities   SubsidyEligibility[]
+}
+
+model SubsidyEligibility {
+  id              String    @id @default(cuid())
+  programId       String
+  companyId       String
+  isEligible      Boolean
+  checkedAt       DateTime  @default(now())
+
+  program         SubsidyProgram @relation(fields: [programId], references: [id])
+  company         Company        @relation(fields: [companyId], references: [id])
+
+  @@unique([programId, companyId])
+}
+
+model Dispute {
+  id              String        @id @default(cuid())
+  applicationId   String
+  status          DisputeStatus @default(OPEN)
+  reason          String
+  resolution      String?
+  strikeCompanyId String?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  application     Application   @relation(fields: [applicationId], references: [id])
+
+  @@index([status, createdAt])
+}
+
+model SmartIdSequence {
+  id      Int    @id @default(autoincrement())
+  year    Int
+  counter Int    @default(0)
+
+  @@unique([year])
+}
+
+model ChatMessage {
+  id              String      @id @default(cuid())
+  applicationId   String
+  senderId        String
+  content         String
+  isSystem        Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+
+  application     Application @relation(fields: [applicationId], references: [id])
+  sender          User        @relation(fields: [senderId], references: [id])
+
+  @@index([applicationId, createdAt])
+}
+
+model Notification {
+  id              String      @id @default(cuid())
+  userId          String
+  type            String
+  title           String
+  message         String
+  applicationId   String?
+  isRead          Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+
+  application     Application? @relation(fields: [applicationId], references: [id])
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
