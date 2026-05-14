@@ -1,0 +1,40 @@
+{
+  "Common": {
+    "welcome": "FinMarket-ке қош келдіңіз",
+    "dashboard": "Басқару тақтасы",
+    "logout": "Шығу",
+    "loading": "Жүктелуде..."
+  },
+  "Developer": {
+    "title": "Әзірлеуші кабинеті",
+    "impersonation": "Рөлдерді ауыстыру",
+    "seed": "Деректерді генерациялау",
+    "clear_db": "Дерекқорды тазарту",
+    "login_as": "Ретінде кіру",
+    "generate": "Генерациялау",
+    "generate_full_cycle": "Толық циклді генерациялау",
+    "clear_all": "Барлығын тазарту",
+    "current_user": "Ағымдағы пайдаланушы"
+  },
+  "Dealer": {
+    "dashboard_title": "Менеджер дашборды",
+    "active_applications": "Белсенді өтінімдер",
+    "closed_this_month": "Осы айда жабылған",
+    "volume_kzt": "Көлем (теңгемен)",
+    "conversion": "Конверсия",
+    "recent_applications": "Соңғы өтінімдер"
+  },
+  "Status": {
+    "DRAFT": "Шимайбақ",
+    "TENDER_ACTIVE": "Тендер",
+    "TENDER_NO_OFFERS": "Ұсыныстар жоқ",
+    "TENDER_CLOSED": "Тендер жабық",
+    "CLIENT_ACCEPTED": "Қабылданды",
+    "DOCUMENTS_PENDING": "Құжаттар",
+    "PAYMENT_PENDING": "Төлем",
+    "DELIVERY_PENDING": "Жөнелту",
+    "DELIVERED": "Жеткізілді",
+    "CANCELLED": "Бас тартылды",
+    "DISPUTED": "Дау"
+  }
+}

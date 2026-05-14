@@ -1,0 +1,40 @@
+{
+  "Common": {
+    "welcome": "Добро пожаловать в FinMarket",
+    "dashboard": "Панель управления",
+    "logout": "Выйти",
+    "loading": "Загрузка..."
+  },
+  "Developer": {
+    "title": "Кабинет разработчика",
+    "impersonation": "Переключение ролей",
+    "seed": "Генерация данных",
+    "clear_db": "Очистка базы данных",
+    "login_as": "Войти как",
+    "generate": "Сгенерировать",
+    "generate_full_cycle": "Сгенерировать полный цикл",
+    "clear_all": "Очистить всё",
+    "current_user": "Текущий пользователь"
+  },
+  "Dealer": {
+    "dashboard_title": "Дашборд Менеджера",
+    "active_applications": "Активных заявок",
+    "closed_this_month": "Закрыто за месяц",
+    "volume_kzt": "Объём в тенге",
+    "conversion": "Конверсия",
+    "recent_applications": "Последние заявки"
+  },
+  "Status": {
+    "DRAFT": "Черновик",
+    "TENDER_ACTIVE": "Тендер",
+    "TENDER_NO_OFFERS": "Нет предложений",
+    "TENDER_CLOSED": "Тендер закрыт",
+    "CLIENT_ACCEPTED": "Принято",
+    "DOCUMENTS_PENDING": "Документы",
+    "PAYMENT_PENDING": "Оплата",
+    "DELIVERY_PENDING": "Отгрузка",
+    "DELIVERED": "Доставлено",
+    "CANCELLED": "Отменено",
+    "DISPUTED": "Спор"
+  }
+}
