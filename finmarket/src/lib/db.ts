@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 
-export const prisma = new PrismaClient().$extends({
+export const createQueryExtension = () => ({
   query: {
     $allModels: {
-      async $allOperations({ model, operation, args, query }) {
+      async $allOperations({ model, operation, args, query }: { model: string, operation: string, args: unknown, query: (args: unknown) => Promise<unknown> }) {
         const start = performance.now();
         const result = await query(args);
         const end = performance.now();
@@ -19,3 +19,15 @@ export const prisma = new PrismaClient().$extends({
     },
   },
 });
+
+const prismaClientSingleton = () => {
+  return new PrismaClient().$extends(createQueryExtension());
+};
+
+declare global {
+  var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>;
+}
+
+export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
