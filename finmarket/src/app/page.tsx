@@ -6,36 +6,36 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Navbar */}
       <header className="flex items-center justify-between p-6 glassmorphism sticky top-0 z-50">
-        <div className="text-2xl font-bold tracking-tight text-text-fg">
+        <div className="text-2xl font-bold tracking-tight text-accent-blue">
           Fin<span className="text-accent-gold">Market</span>
         </div>
         <nav className="hidden md:flex gap-6">
-          <Link href="/catalog" className="font-medium text-slate-300 hover:text-accent-gold transition">Каталог</Link>
-          <Link href="/about" className="font-medium text-slate-300 hover:text-accent-gold transition">О нас</Link>
-          <Link href="/contact" className="font-medium text-slate-300 hover:text-accent-gold transition">Контакты</Link>
+          <Link href="/catalog" className="font-medium text-slate-600 hover:text-accent-blue transition">Каталог</Link>
+          <Link href="/about" className="font-medium text-slate-600 hover:text-accent-blue transition">О нас</Link>
+          <Link href="/contact" className="font-medium text-slate-600 hover:text-accent-blue transition">Контакты</Link>
         </nav>
         <div className="flex gap-4">
-          <Link href="/sign-in" className="font-medium text-slate-300 hover:text-accent-gold py-2">Войти</Link>
+          <Link href="/sign-in" className="font-medium text-slate-600 hover:text-accent-blue py-2">Войти</Link>
           <Link href="/catalog" className="btn-primary py-2 px-4">В каталог</Link>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center text-center px-4 py-32 overflow-hidden bg-bg-primary">
-        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-bg-surface via-bg-primary to-bg-primary"></div>
+      <section className="relative flex flex-col items-center justify-center text-center px-4 py-32 overflow-hidden bg-bg-surface">
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-100 via-bg-surface to-bg-surface"></div>
         <div className="z-10 max-w-4xl space-y-8">
-          <h1 className="text-5xl md:text-7xl font-extrabold text-text-fg tracking-tight leading-tight">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-tight">
             Лизинг спецтехники <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-gold to-[#F3E5AB]">нового поколения</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-blue to-accent-gold">нового поколения</span>
           </h1>
-          <p className="text-xl md:text-2xl text-slate-400 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-slate-600 max-w-2xl mx-auto">
             От заявки до отгрузки — в одном окне. Интеллектуальный подбор лизинговых компаний и прозрачные тендеры.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             <Link href="/catalog" className="btn-gold flex items-center justify-center gap-2 text-lg">
-              Подобрать технику <ArrowRight className="w-5 h-5 text-slate-900" />
+              Подобрать технику <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link href="/contact" className="btn-primary bg-bg-surface border border-border text-text-fg hover:bg-border flex items-center justify-center gap-2 text-lg">
+            <Link href="/contact" className="btn-primary bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 flex items-center justify-center gap-2 text-lg">
               Стать дилером
             </Link>
           </div>
@@ -43,32 +43,32 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="py-24 px-6 bg-bg-surface">
+      <section className="py-24 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-text-fg">Как это работает</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-slate-900">Как это работает</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="glassmorphism p-8 rounded-2xl text-center space-y-4 hover:-translate-y-2 transition-transform duration-300">
-              <div className="w-16 h-16 bg-[#001f3f] rounded-full flex items-center justify-center mx-auto text-accent-gold mb-6 border border-border">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-accent-blue mb-6">
                 <Search className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-text-fg">Smart Matching</h3>
-              <p className="text-slate-400">ИИ автоматически подбирает лизинговые компании под ваш профиль и запрашиваемую технику.</p>
+              <h3 className="text-xl font-bold text-slate-900">Smart Matching</h3>
+              <p className="text-slate-600">ИИ автоматически подбирает лизинговые компании под ваш профиль и запрашиваемую технику.</p>
             </div>
 
             <div className="glassmorphism p-8 rounded-2xl text-center space-y-4 hover:-translate-y-2 transition-transform duration-300">
-              <div className="w-16 h-16 bg-[#332A00] rounded-full flex items-center justify-center mx-auto text-accent-gold mb-6 border border-border">
+              <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto text-accent-gold mb-6">
                 <Zap className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-text-fg">Reverse Tender</h3>
-              <p className="text-slate-400">Лизинговые компании конкурируют за вашу заявку, предлагая лучшие условия в режиме реального времени.</p>
+              <h3 className="text-xl font-bold text-slate-900">Reverse Tender</h3>
+              <p className="text-slate-600">Лизинговые компании конкурируют за вашу заявку, предлагая лучшие условия в режиме реального времени.</p>
             </div>
 
             <div className="glassmorphism p-8 rounded-2xl text-center space-y-4 hover:-translate-y-2 transition-transform duration-300">
-              <div className="w-16 h-16 bg-[#00331A] rounded-full flex items-center justify-center mx-auto text-emerald-500 mb-6 border border-border">
+              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto text-emerald-600 mb-6">
                 <ShieldCheck className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-text-fg">Digital Workflow</h3>
-              <p className="text-slate-400">От подачи заявки до подписания документов и контроля отгрузки — всё онлайн.</p>
+              <h3 className="text-xl font-bold text-slate-900">Digital Workflow</h3>
+              <p className="text-slate-600">От подачи заявки до подписания документов и контроля отгрузки — всё онлайн.</p>
             </div>
           </div>
         </div>

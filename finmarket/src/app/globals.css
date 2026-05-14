@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-primary: #000C1A;
-  --color-bg-surface: #001226;
+  --color-bg-primary: #FFFFFF;
+  --color-bg-surface: #F8FAFC;
   --color-accent-gold: #D4AF37;
-  --color-text-fg: #F0F4F8;
-  --color-border: #00264D;
+  --color-accent-blue: #0F172A;
+  --color-text-fg: #1E293B;
+  --color-border: #E2E8F0;
 
   --font-sans: 'Inter', sans-serif;
 }
@@ -20,14 +21,14 @@
 
 @layer utilities {
   .glassmorphism {
-    @apply bg-bg-surface/70 backdrop-blur-md border border-border shadow-[0_4px_30px_rgba(0,0,0,0.5)];
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.1)];
   }
 
   .btn-primary {
-    @apply bg-accent-gold text-slate-900 font-bold py-3 px-6 rounded-lg shadow-md hover:brightness-110 transition-all duration-300;
+    @apply bg-accent-blue text-white font-medium py-3 px-6 rounded-lg shadow-md hover:bg-slate-800 transition-all duration-300;
   }
 
   .btn-gold {
-    @apply bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] text-slate-900 font-bold py-3 px-6 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] transition-all duration-300;
+    @apply bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] text-slate-900 font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300;
   }
 }
