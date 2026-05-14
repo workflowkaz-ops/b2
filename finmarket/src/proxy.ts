@@ -11,7 +11,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/v1/listings",
   "/api/v1/verify/(.*)",
   "/sign-in(.*)",
-  "/sign-up(.*)"
+  "/sign-up(.*)",
+  "/unauthorized"
 ]);
 
 const isDealerRoute = createRouteMatcher(["/dashboard/dealer(.*)"]);
@@ -51,7 +52,7 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
-  return NextResponse.next();
+  return NextResponse.redirect(new URL("/unauthorized", req.url));
 });
 
 export const config = {
